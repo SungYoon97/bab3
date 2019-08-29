@@ -1,3 +1,9 @@
+<%@page import="java.sql.ResultSet"%>			
+<%@page import="java.sql.PreparedStatement"%>		
+<%@page import="javax.sql.DataSource"%>		
+<%@page import="javax.naming.InitialContext"%>		
+<%@page import="javax.naming.Context"%>		
+<%@page import="java.sql.Connection"%>	
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 
@@ -10,24 +16,51 @@
 	String name = request.getParameter("username");
 	String password = request.getParameter("password");
 	
-	System.out.println(name);
-	System.out.println(password);
+	// DB 에서 받아온 정보로 name과 password 를 비교
+	// 위 받아온 데이터들을 DB에 저장 하는 방법을 해야함
+	Connection conn = null;
+	Boolean connect = false;
+   	boolean isLogin = false; // html 부분에서 사용
+
+   String sql = "SELECT * FROM users WHERE email = ? AND pw = ?";
+   
+   try {
+         
+   	Context init = new InitialContext();
+   	DataSource ds = (DataSource)init.lookup("java:comp/env/jdbc/kndb");
+   	conn = ds.getConnection();
+   	
+	PreparedStatement pstmt = conn.prepareStatement(sql);			
+	pstmt.setString(1, name);
+	pstmt.setString(2, password);
 	
-	//	이름과 패스워드 체크
-	//	임시로 이름과 패스워드를 지정(이미 회원인 사람)
-	String regName = "회식";
-	String regPw = "20190826";
-	boolean isLogin = false;
-	//	만약 로그인을 시도하는 사람이 회식과 20190826이면
-	if (name.equals(regName) && password.equals(regPw)){		
-		//	로그인 성공
-		System.out.println("로그인 성공");
-		isLogin = true;
-	} else {  //	아니면
-		//	로그인 실패
-		System.out.println("로그인 실패");
-		}
+	ResultSet rs = pstmt.executeQuery();			
+
+	if (rs.next()) {			
+		System.out.println(rs.getString("name"));		
+		System.out.println(" 님 반갑습니다!!");
+		isLogin = true; // 데이터기 있으면 true 변경
+	} else {			
+		System.out.println("아이디가 없거나 패스워드가 틀립니다.");		
+	}			
 	
+           connect = true;
+           conn.close();
+   } catch (Exception e) {
+           connect = false;
+           e.printStackTrace();
+   }
+        %>
+        <%
+                if (connect == true) {
+        %>
+        연결되었습니다.
+        <%
+                } else {
+        %>
+        연결에 실패하였습니다.
+        <%
+                }
 
 %>
 

@@ -1,3 +1,8 @@
+<%@page import="java.sql.PreparedStatement"%>		
+<%@page import="javax.sql.DataSource"%>		
+<%@page import="javax.naming.InitialContext"%>		
+<%@page import="javax.naming.Context"%>		
+<%@page import="java.sql.Connection"%>		
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 
@@ -10,15 +15,47 @@
 	String name = request.getParameter("username");
 	String email = request.getParameter("email");
 	String password = request.getParameter("password");
-	String cpassword = request.getParameter("confirm-password");
-	System.out.println(name);
-	System.out.println(email);
-	System.out.println(password);
-	System.out.println(cpassword);
+	
+	// 위 데이터를 데이터 베이스에 넣기
+	Connection conn = null;
+    String driver = "oracle.jdbc.driver.OracleDriver";
+    String url = "jdbc:oracle:thin:@localhost:1521:KnDB";
 
-	//위 받아온 데이터들을 DB에 저장하는 방법을 해야함
+    Boolean connect = false;
 
+    String sql = "	INSERT INTO users(NAME, PW, EMAIL) VALUES (?, ?, ?)";
+    
+    try {
+          
+    	Context init = new InitialContext();
+    	DataSource ds = (DataSource)init.lookup("java:comp/env/jdbc/kndb");
+    	conn = ds.getConnection();
+    	
+		PreparedStatement pstmt = conn.prepareStatement(sql);			
+		pstmt.setString(1, name);			
+		pstmt.setString(2, password);			
+		pstmt.setString(3, email);			
+		pstmt.executeUpdate();			
+    	
+            connect = true;
+            conn.close();
+    } catch (Exception e) {
+            connect = false;
+            e.printStackTrace();
+    }
 %>
+<%
+    if (connect == true) {
+%>
+연결되었습니다.
+<%
+    } else {
+%>
+연결에 실패하였습니다.
+<%
+    }
+%>
+
 
 <!DOCTYPE html>
 <html>
@@ -33,7 +70,6 @@
 
 회원 가입이 완료 되었습니다.<br>
 <a href="sign.jsp">로그인 하기</a>
-
-
+			
 </body>
 </html>
