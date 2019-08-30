@@ -20,8 +20,12 @@
 	// 위 받아온 데이터들을 DB에 저장 하는 방법을 해야함
 	Connection conn = null;
 	Boolean connect = false;
-   	boolean isLogin = false; // html 부분에서 사용
-
+	
+	 // html 부분에서 사용
+   	boolean isLogin = false;
+	String hello = "";	//db 에서 받아온 이름을 html 부분에서 출력
+	
+	
    String sql = "SELECT * FROM users WHERE email = ? AND pw = ?";
    
    try {
@@ -37,7 +41,8 @@
 	ResultSet rs = pstmt.executeQuery();			
 
 	if (rs.next()) {			
-		System.out.println(rs.getString("name"));		
+		hello = rs.getString("name");	
+		System.out.print("name");		
 		System.out.println(" 님 반갑습니다!!");
 		isLogin = true; // 데이터기 있으면 true 변경
 	} else {			
@@ -75,7 +80,8 @@
 
 <% if (isLogin)	{ %>
 	<script> alert("로그인 성공");</script>
-	이름: <b style=" color: tomato;"><%=name %></b><br>
+	<b style=" color: tomato;"><%=hello %></b> 반갑습니다.<br>
+	이메일: <b style=" color: tomato;"><%=name %></b><br>
 	암호: <b style=" color: tomato;"><%=password %></b><br>
 	
 <% } else { %>
